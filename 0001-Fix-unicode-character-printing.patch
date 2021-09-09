@@ -1,0 +1,72 @@
+From fbffac1c5879f92c2091cc93fb7a4b1912251e56 Mon Sep 17 00:00:00 2001
+From: Hsiu-Ming Chang <cges30901@gmail.com>
+Date: Thu, 9 Sep 2021 08:56:33 +0800
+Subject: [PATCH] Fix unicode character printing
+
+Update patch from https://github.com/abishekvashok/cmatrix/pull/112
+---
+ CMakeLists.txt |  1 +
+ cmatrix.c      | 21 +++++++++++++++++----
+ 2 files changed, 18 insertions(+), 4 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6c50d7b..68ee176 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -50,6 +50,7 @@ if	(HAVE_GETOPT_H)
+ endif	()
+ 
+ Set(CURSES_NEED_NCURSES TRUE)
++Set(CURSES_NEED_WIDE TRUE)
+ find_package(Curses)
+ include_directories(${CURSES_INCLUDE_DIR})
+ add_definitions(-DHAVE_NCURSES_H)
+diff --git a/cmatrix.c b/cmatrix.c
+index 4ace59e..0e777e0 100644
+--- a/cmatrix.c
++++ b/cmatrix.c
+@@ -21,6 +21,8 @@
+ 
+ */
+ 
++#define NCURSES_WIDECHAR 1
++
+ #include <errno.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+@@ -517,9 +519,12 @@ if (console) {
+ 
+     /* Set up values for random number generation */
+     if (classic) {
+-        /* Japanese character unicode range [they are seen in the original cmatrix] */
+-        randmin = 12288;
+-        highnum = 12351;
++        /* Half-width kana characters. In the movie they are y-axis flipped, and
++         * they appear alongside latin characters and numerals, but this is the
++         * closest we can do with a standard unicode set and a single number
++         * range */
++        randmin = 0xff66;
++        highnum = 0xff9d;
+     } else if (console || xwindow) {
+         randmin = 166;
+         highnum = 217;
+@@ -830,7 +835,15 @@ if (console) {
+                         } else if (lambda && matrix[i][j].val != ' ') {
+                             addstr("λ");
+                         } else {
+-                            addch(matrix[i][j].val);
++                            /* addch doesn't seem to work with unicode
++                             * characters and there was no direct equivalent.
++                             * So, construct a c-style string with the character
++                             * and print that.
++                             */
++                            wchar_t char_array[2];
++                            char_array[0] = matrix[i][j].val;
++                            char_array[1] = 0;
++                            addwstr(char_array);
+                         }
+                         if (bold == 2 ||
+                             (bold == 1 && matrix[i][j].val % 2 == 0)) {
+-- 
+2.33.0
+

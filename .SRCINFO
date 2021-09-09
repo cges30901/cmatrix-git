@@ -1,6 +1,6 @@
 pkgbase = cmatrix-git
 	pkgdesc = A curses-based scrolling 'Matrix'-like screen
-	pkgver = 1.2.r45.g70be5c3
+	pkgver = 1.2.r108.g0365a63
 	pkgrel = 1
 	url = http://www.asty.org/cmatrix/
 	arch = x86_64
@@ -11,7 +11,8 @@ pkgbase = cmatrix-git
 	provides = cmatrix
 	conflicts = cmatrix
 	source = git+https://github.com/abishekvashok/cmatrix
+	source = 0001-Fix-unicode-character-printing.patch
 	md5sums = SKIP
+	md5sums = 8eff5e9b5f83f5bd2691f26452820b36
 
 pkgname = cmatrix-git
-
